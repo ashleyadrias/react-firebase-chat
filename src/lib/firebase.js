@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Toggle for local or hosted environment
-const useFirebaseConfig = false; // Set to `true` for hosted, `false` for local
+const useFirebaseConfig = true; // Set to `true` for hosted, `false` for local
 
 let firebaseServices = {}; // Store initialized services here
 
