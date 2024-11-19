@@ -1,9 +1,26 @@
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { storage } from "./firebase";
+import { getFirebaseServices } from "./firebase";
+
+// Switch between local and Firebase-hosted configurations
+const useFirebaseConfig = true; // Set to `false` for local usage
+
+// Local Firebase configuration (only used when `useFirebaseConfig` is false)
+import { storage as localStorage } from "./firebase";
 
 const upload = async (file) => {
+  let storageInstance;
+
+  if (useFirebaseConfig) {
+    // Use hosted Firebase services
+    const { storage } = await getFirebaseServices();
+    storageInstance = storage;
+  } else {
+    // Use local Firebase configuration
+    storageInstance = localStorage;
+  }
+
   const date = new Date();
-  const storageRef = ref(storage, `images/${date + file.name}`);
+  const storageRef = ref(storageInstance, `images/${date.toISOString()}-${file.name}`);
 
   const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -11,12 +28,11 @@ const upload = async (file) => {
     uploadTask.on(
       "state_changed",
       (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         console.log("Upload is " + progress + "% done");
       },
       (error) => {
-        reject("Something went wrong!" + error.code);
+        reject("Something went wrong! " + error.code);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
