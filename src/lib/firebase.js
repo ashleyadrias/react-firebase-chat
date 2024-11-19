@@ -3,8 +3,18 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// Toggle for local or hosted environment
-const useFirebaseConfig = true; // Set to `true` for hosted, `false` for local
+// Switch between local and hosted Firebase configurations
+const useFirebaseConfig = true; // Set to `false` for local usage
+
+// Local Firebase configuration (only used when `useFirebaseConfig` is false)
+const localFirebaseConfig = {
+  apiKey: import.meta.env.VITE_API_KEY,
+  authDomain: "reactchat-7e9b0.firebaseapp.com",
+  projectId: "reactchat-7e9b0",
+  storageBucket: "reactchat-7e9b0.firebasestorage.app",
+  messagingSenderId: "858649800389",
+  appId: "1:858649800389:web:b67c998313649ed562caac",
+};
 
 let firebaseServices = {}; // Store initialized services here
 
@@ -16,48 +26,30 @@ const fetchFirebaseConfig = async () => {
     if (!response.ok) {
       throw new Error("Failed to fetch Firebase config");
     }
-    return await response.json();
+    const config = await response.json();
+    return config;
   } catch (error) {
     console.error("Error fetching Firebase config:", error);
-    return {}; // Handle the error case
+    return {}; // Return empty config in case of failure
   }
 };
 
-const initializeLocalFirebase = () => {
-  const firebaseConfig = {
-    apiKey: import.meta.env.VITE_API_KEY,
-    authDomain: "reactchat-7e9b0.firebaseapp.com",
-    projectId: "reactchat-7e9b0",
-    storageBucket: "reactchat-7e9b0.firebasestorage.app",
-    messagingSenderId: "858649800389",
-    appId: "1:858649800389:web:b67c998313649ed562caac",
-  };
-
-  const app = initializeApp(firebaseConfig);
-  return {
-    auth: getAuth(app),
-    db: getFirestore(app),
-    storage: getStorage(app),
-  };
-};
-
+// Initialize Firebase dynamically
 const initializeFirebase = async () => {
   if (Object.keys(firebaseServices).length === 0) {
-    if (useFirebaseConfig) {
-      const firebaseConfig = await fetchFirebaseConfig(); // Fetch from the hosted function
-      if (Object.keys(firebaseConfig).length > 0) {
-        const app = initializeApp(firebaseConfig);
-        firebaseServices = {
-          auth: getAuth(app),
-          db: getFirestore(app),
-          storage: getStorage(app),
-        };
-      } else {
-        throw new Error("Failed to initialize Firebase: invalid hosted config");
-      }
+    const firebaseConfig = useFirebaseConfig
+      ? await fetchFirebaseConfig() // Dynamically fetch config when hosted
+      : localFirebaseConfig; // Use local config when running locally
+
+    if (Object.keys(firebaseConfig).length > 0) {
+      const app = initializeApp(firebaseConfig);
+      firebaseServices = {
+        auth: getAuth(app),
+        db: getFirestore(app),
+        storage: getStorage(app),
+      };
     } else {
-      // Use local Firebase config
-      firebaseServices = initializeLocalFirebase();
+      throw new Error("Failed to initialize Firebase: invalid config");
     }
   }
   return firebaseServices;
