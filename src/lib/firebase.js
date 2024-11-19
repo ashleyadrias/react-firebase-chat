@@ -55,5 +55,8 @@ const initializeFirebase = async () => {
   return firebaseServices;
 };
 
-// Export Firebase services
+// Export Firebase services individually
 export const getFirebaseServices = initializeFirebase;
+export const getAuthService = () => getFirebaseServices().auth;
+export const getDbService = () => getFirebaseServices().db;
+export const getStorageService = () => getFirebaseServices().storage;
