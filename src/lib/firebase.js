@@ -46,7 +46,7 @@ const initializeFirebase = async () => {
       firebaseServices = {
         auth: getAuth(app),
         db: getFirestore(app),
-        storage: getStorage(app),
+        storage: getStorage(app), // Store storage service in the firebaseServices object
       };
     } else {
       throw new Error("Failed to initialize Firebase: invalid config");
@@ -55,8 +55,11 @@ const initializeFirebase = async () => {
   return firebaseServices;
 };
 
-// Export Firebase services individually
+// Explicitly export the Firebase services
 export const getFirebaseServices = initializeFirebase;
 export const getAuthService = () => getFirebaseServices().auth;
 export const getDbService = () => getFirebaseServices().db;
-export const getStorageService = () => getFirebaseServices().storage;
+export const getStorageService = async () => {
+  const services = await getFirebaseServices();
+  return services.storage; // Return storage from initialized services
+};
