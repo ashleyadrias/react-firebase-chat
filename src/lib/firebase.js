@@ -10,13 +10,10 @@ const firebaseConfig = {
   storageBucket: "reactchat-7e9b0.firebasestorage.app",
   messagingSenderId: "858649800389",
   appId: "1:858649800389:web:b67c998313649ed562caac",
-  measurementId: "G-NX84ZZ6XQ7"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-//export storage and auth
 export const auth = getAuth()
 export const db = getFirestore()
 export const storage = getStorage()
